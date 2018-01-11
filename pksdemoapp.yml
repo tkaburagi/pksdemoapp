@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pksdemoapp-pv-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata: 
+  name: pksdemoapp-deployment
+  labels: 
+    app: pksdemoapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pksdemoapp
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: pksdemoapp
+    spec:
+      containers:
+      - name: pksdemoapp
+        image: tkaburagi/pksdemoapp
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: bootapp-persistent-storage
+          mountPath: /app/data
+        env:
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: MY_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+      volumes:
+      - name: bootapp-persistent-storage
+        persistentVolumeClaim:
+          claimName: pksdemoapp-pv-claim
