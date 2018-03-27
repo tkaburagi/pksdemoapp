@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: 
+  name: pksdemoapp-ss
+  labels: 
+    app: pksdemoapp-ss
+spec:
+  selector:
+    matchLabels:
+      app: pksdemoapp-ss # has to match .spec.template.metadata.labels
+  serviceName: "pksdemoapp-service"
+  replicas: 1
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: pksdemoapp-ss
+    spec:
+      containers:
+      - name: pksdemoapp
+        image: tkaburagi/pksdemoapp
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: www
+          mountPath: /app/data
+        env:
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: MY_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+  volumeClaimTemplates:
+   - metadata:
+       name: www
+     spec:
+       accessModes: [ "ReadWriteOnce" ]
+       resources:
+         requests:
+           storage: 1Gi
+

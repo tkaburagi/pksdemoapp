@@ -2,3 +2,4 @@
 
 kubectl delete persistentvolumeclaim pksdemoapp-pv-claim
 kubectl delete deployment pksdemoapp-deployment
+kubectl delete service pksdemoapp-deployment
